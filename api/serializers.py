@@ -13,7 +13,7 @@ class AuthorSerializer(serializers.ModelSerializer):
         fields = ['author']
 
 class NoteSerializer(serializers.ModelSerializer):
-
+    book = serializers.PrimaryKeyRelatedField(queryset=Book.objects.all())
     class Meta:
         model = Note
         fields = ['book', 'note', 'page_number', 'created_on']

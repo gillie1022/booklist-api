@@ -5,6 +5,15 @@ from api.models import User, Book, Author, Note
 from api.serializers import UserSerializer, BookSerializer, AuthorSerializer, NoteSerializer
 from django_filters import rest_framework as filters
 
+class IsOwner(permissions.BasePermission):
+    def has_permission(self, request, view):
+        return bool(request.method in permissions.SAFE_METHODS
+                    and (request.user and request.user.is_authenticated))
+
+    def has_object_permission(self, request, view, obj):
+        return bool(request.user and request.user.is_authenticated
+                    and obj.user == request.user)
+
 class BookFilter(filters.FilterSet):
     class Meta:
         model = Book
@@ -12,7 +21,7 @@ class BookFilter(filters.FilterSet):
 
 class BookViewSet(viewsets.ModelViewSet):
     serializer_class = BookSerializer
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsOwner]
     filterset_class = BookFilter
     
     def get_queryset(self):
@@ -25,9 +34,12 @@ class BookViewSet(viewsets.ModelViewSet):
 class NoteViewSet(viewsets.ModelViewSet):
     queryset = Note.objects.all()
     serializer_class = NoteSerializer
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsOwner]
+    def get_queryset(self):
+        queryset = Note.objects.filter(user=self.request.book.user)
+        return queryset
 
 class AuthorViewSet(viewsets.ModelViewSet):
     queryset = Author.objects.all()
     serializer_class = AuthorSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [IsOwner]

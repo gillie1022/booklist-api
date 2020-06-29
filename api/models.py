@@ -34,6 +34,7 @@ class Book(models.Model):
     status = models.CharField(max_length=7, choices=STATUS_CHOICES, default=TO_READ)
     
 class Note(models.Model):
+    user = models.ForeignKey(to=User, on_delete=models.CASCADE, related_name='notes', null=True, blank=True)
     book = models.ForeignKey(to=Book, on_delete=models.CASCADE, related_name="notes", null=True, blank=True)
     note = models.CharField(max_length=500, null=True, blank=True)
     page_number = models.PositiveIntegerField(null=True, blank=True)
